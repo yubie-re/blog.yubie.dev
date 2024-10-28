@@ -13,7 +13,7 @@
 <meta name="language" content="English">
 <meta property="og:title" content="Yubie-re's blog" />
 <meta property="og:description" content="A blog of interesting things I've encountered" />
-<meta property="og:image" content="https://yubie.dev/meta/og.png" />
+<meta property="og:image" content="https://blog.yubie.dev/meta/og.png" />
 <meta property="og:type" content="article" />
 </svelte:head>
 
