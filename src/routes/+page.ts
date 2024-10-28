@@ -1,15 +1,8 @@
+import type IMetadata from '$lib/types/IMetadata';
+import type IPost from '$lib/types/IPost';
 import type { PageLoad } from './$types';
 
-type IMetadata = {
-	title: string;
-	date: string;
-    author: string;
-};
 
-type IPost = {
-	meta: IMetadata;
-	path: string;
-};
 
 const fetchMarkdownPosts = async (): Promise<IPost[]> => {
 	const allPostFiles = import.meta.glob('/src/routes/blog/*.md');
@@ -18,6 +11,7 @@ const fetchMarkdownPosts = async (): Promise<IPost[]> => {
 	const allPosts = await Promise.all(
 		iterablePostFiles.map(async ([path, resolver]) => {
 			const { metadata } = (await resolver()) as { metadata: IMetadata };
+			console.log(metadata);
 			const postPath = path.slice(11, -3);
 
 			return {

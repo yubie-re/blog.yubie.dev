@@ -2,13 +2,15 @@
 title: Castle.io - A reversal of a commercial antibot solution
 date: '2024-10-26'
 author: 'yubie-re'
+description: "This blog post explores the inner workings of castle.io's, and how I managed to emulate their behavior to generate and decode a X-Castle-Request-Token"
+tags: "castle,castle.io,yubie,yubie.dev,blog.yubie.dev,castle.js,npm,selenium,sequentum,x-castle-request-token"
 ---
 
 **Castle.io** is a Software-as-a-Service (SaaS) platform designed to help businesses combat spam, fraud, and malicious behavior online. By leveraging browser fingerprinting, Castle.io monitors, tracks, and analyzes user interactions, making it easier to distinguish between real users and automated bots. Websites using Castle.io append a `X-Castle-Request-Token` header, a Base64-encoded string containing fingerprint data about the user's device and browser. This blog post explores the inner workings of this token: what data is being transmitted, the obfuscation techniques used, and how I managed to emulate their behavior to generate and decode any `X-Castle-Request-Token` header.
 
-### String deobfuscation
+## String deobfuscation
 
-To begin the analysis, you can download the latest release from Castle.io’s [npm page](https://www.npmjs.com/). I focused on version **2.4.1**, which, despite being somewhat outdated, retains the core functionality. The main code of interest is found in `castle.browser.js`, a minified JavaScript file with some obfuscated data blobs, as shown below.
+To begin the analysis, you can download the latest release from Castle.io’s [npm page](https://www.npmjs.com/package/@castleio/castle-js). I focused on version **2.4.1**, which, despite being somewhat outdated, retains the core functionality. The main code of interest is found in `castle.browser.js`, a minified JavaScript file with some obfuscated data blobs, as shown below.
 
 ![Obfuscated data blob](/images/obfuscation_code.png)
 
@@ -33,13 +35,13 @@ fpData =
     HexFF;
 ```
 
-### Decoding the token: Part 1
+## Decoding the token: Part 1
 
 The first part seems to come from an array of values I labeled as `storage1Values`. This is essentially an array of hex strings which have a specific type of encoding. The first byte is always fingerprint value index and serialization type, and the rest of the data depends on what type of value it is. Here is an example of how these are inserted:
 
 ![alt text](/images/fp_example.png)
 
-They seem to define a enum for each type of fingerprint value. These are what I labeled each one for the first part:
+They seem to define a constant for each type of fingerprint value. These are what I labeled each one for the first part:
 ```js
 FP_PlatformEnum = 0,
 FP_VendorEnum = 1,
@@ -89,9 +91,11 @@ B2H_ROUNDED = 6, // This rounds the value * 10, then encodes to a byte.
 JUST_APPEND = 7, // This simply appends a byte array
 ```
 
-The first byte of the value includes one of the types above, and the index of the fingerprint value type. The rest of the data is reserved for the value.
+The first byte of the value includes one of the types above, and the index of the fingerprint value type using some bit magic. The rest of the data is reserved for the value.
 
-With this info, and a little bit of size logging, we can now decode the first part of the token:
+With this info, and a little bit of size logging, we can now decode the first part of the token.
+
+### Decoded part 1 data from a real token
 ```python
 P1 Info 0 data B2H: 1
 P1 Info 1 data B2H: 0
@@ -124,7 +128,7 @@ P1 Info 30 data JA: 5dc5abb588
 P1 Info 31 data JA: a26a
 ```
 
-### Decoding the token: Part 2 
+## Decoding the token: Part 2 
 The second part of the fingerprint is encoded exactly the same as the first part, but has completely different data.
 ```js
 FP_ConstantOne = 0,
@@ -147,17 +151,21 @@ FP2_ClassPropertiesCount = 21,
 FP2_UserLocale2 = 22,
 ```
 This data is a lot more complex in nature than the first part. There are a couple interesting values in here.
-#### Ad Blocker Hash
+### Ad Blocker Hash
 This creates a bunch of divs with the names of ads which end up getting blocked by ad blockers. This checks if the divs are present after adding them and creates a hash based on what is there.
 ![alt text](/images/adblockerddivs.png)
 
 
-#### Privacy Blocker Detection
+### Privacy Blocker Detection
 This checks for privacy blocking browsers or plugins. The following are sent if found: JShelter, NoScript, Puppeteer, PrivacyPossum, PrivacyBadger, DuckDuckGo, Chameleon, CanvasBlocker, Trace, and Brave.
+This part seems to be *heavily inspired* by [CreepJS](https://github.com/abrahamjuliot/creepjs/blob/2ca0c340225aa86bf92b7ed6647103f2b7aa6809/src/resistance/index.ts).
 
-#### Web Driver Detection
-This checks for presence of automations tools such as Selenium, sequentum, nightmare, or phantom. If these are found, a bitfield with what was found is sent.
+### Web Driver Detection
+This checks for presence of automation tools such as [Selenium](https://www.selenium.dev/), [Sequentum](https://www.sequentum.com/), [Nightmare](https://github.com/segment-boneyard/nightmare), or [Phantom](https://phantomjs.org/). If these are found, a bitfield with what was found is sent.
+
+#### Selenium
 For selenium, they check the following:
+
 ```
 Selenium_IDE_Recorder
 callSelenium
@@ -177,14 +185,18 @@ selenium
 webdriver
 driver
 ```
-For nightmare, they check `__nightmare`.
-For sequentum, they check `data.external.toString().contains("Sequentum")`
-For phantom, they check `callPhantom, _phantom, __phantomas`
+#### Nightmare
 
-#### Brave Detection
+For Nightmare, they check `__nightmare`.
+#### Sequentum
+For Sequentum, they check `window.external.toString().contains("Sequentum")`
+#### Phantom
+For Phantom, they check `callPhantom, _phantom, __phantomas`
+
+### Brave Detection
 This value is added if the user is using Brave (by checking if `navigator.brave.isBrave()`), presumably due to its privacy focused additions.
 
-Example decode data for part 2:
+#### Decoded part 2 data from a real token
 
 ```python
 P2 Info 0 data B2H: 0
@@ -201,7 +213,7 @@ P2 Info 22 data SBA: b'nl-AW'
 ```
 
 
-### Decoding the token: Part 3
+## Decoding the token: Part 3
 
 Part 3 of the fingerprint has a heavy emphasis on input and event values. They monitor the following events: 
 1. keyup
@@ -236,7 +248,13 @@ p1 = [
 ]
 ```
 
-The next values are custom floats which fit in one byte. These floats range from differences in time between events to differences in angle between events. The reversed values are laid out here:
+The next values are custom floats which fit in one byte.
+
+For values greater than 128: encode float with 4 bytes for exponent, 3 bits for mantissa.
+
+For values less than 128: encode float with 2 bytes for exponent, 4 bits for mantissa.
+
+These actual values range from differences in time between events to differences in angle between events. The reversed values are laid out here:
 
 ```js
 p2 = [
@@ -312,8 +330,76 @@ p3 =  [
 ]
 ```
 
-## Token Decoding and Encoding
-Now that we understand the data going into the fingerprint, how do we decode/encode it?
+### Decoded part 3 of the token
+
+```python
+Bitfield: 0b100001001000000
+Float 0 40.0
+Float 1 0
+Float 2 78.0
+Float 3 0
+Float 4 66.0
+Float 5 0
+Float 6 0.0
+Float 7 0.0
+Float 8 74.0
+Float 9 6.0
+Float 10 36.0
+Float 11 2.75
+Float 12 0
+Float 13 0
+Float 14 0
+Float 15 0
+Float 16 0
+Float 17 0
+Float 18 0
+Float 19 0
+Float 20 174.0
+Float 21 5.25
+Float 22 142.0
+Float 23 3.25
+Float 24 1.75
+Float 25 0.8125
+Float 26 0.0
+Float 27 0.0
+Float 28 0
+Float 29 0
+Float 30 0
+Float 31 0
+Float 32 0.0
+Float 33 0.0
+Float 34 0.0
+Float 35 0.0
+Float 36 0.0
+Float 37 0.0
+Float 38 1.0
+Float 39 0.0
+Float 40 1.0
+Float 41 0.0
+Float 42 3.75
+Float 43 1.0
+Float 44 40.0
+Float 45 40.0
+Float 46 34.0
+Float 47 27.0
+Float 48 1.5
+Float 49 0.0
+Float 50 0.75
+Float 51 1.0
+Float 52 0.0
+Int 0 171
+Int 1 3
+Int 2 1
+Int 3 0
+Int 4 3
+Int 5 0
+Int 6 0
+Int 7 0
+Int 8 0
+```
+
+## Encrypting the token
+Now that we understand the data going into the fingerprint, how do we encode it?
 1. Generate a string based off the current timestamp. 
 2. Derive a key from this string, and xor all the fingerprint data with this key.
 3. Derive a key from the CUID cookie (a random 16 byte string), and xor the encrypted data + the previous key.
@@ -321,9 +407,9 @@ Now that we understand the data going into the fingerprint, how do we decode/enc
 5. The fingerprint size thus far is appended as one byte (if over 255 long, it will simply mask it to one byte).
 6. A random byte is generated, and all the data is xored one more time, and the random byte is appended to the result. 
 7. Encode the final data with Base64(URL), and strip any padding.
-Using all the data we've gathered, we can generate completely new fingerprints, and decode existing tokens to extract data from.
+
+Using all the data we've gathered, we can generate completely new fingerprints, and decode existing tokens to extract data from by following this method in reverse.
 
 ## Conclusion
-
 
 Castle.io’s ``X-Castle-Request-Token`` is a sophisticated mechanism for gathering and analyzing browser fingerprint data. By decoding its components, we can gain insights into its operations and even replicate its behavior. The code to generate and decode tokens is all available on my [repository](https://github.com/yubie-re/castleio).

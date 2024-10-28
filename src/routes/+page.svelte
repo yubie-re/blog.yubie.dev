@@ -1,10 +1,14 @@
 <script lang="ts">
     import * as Card from "$lib/components/ui/card/index.js";
     export let data;
+    import {
+	    blur,
+    } from 'svelte/transition';
 </script>
 
 
-<div class="space-y-3">
+
+<div class="space-y-3" in:blur>
 {#each data.posts as post}
 <div class = "px-10">
 <a href={post.path}>

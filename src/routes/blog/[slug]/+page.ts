@@ -1,3 +1,4 @@
+import type IMetadata from '$lib/types/IMetadata';
 import type { PageLoad } from './$types';
 import { error } from '@sveltejs/kit';
 
@@ -9,13 +10,12 @@ export const load: PageLoad = async ({ params }) => {
 
     try {
         const post = await import(`../${params.slug}.md`);
-        const { title, date } = post.metadata;
+        const metadata = post.metadata as IMetadata;
         const content = post.default;
 
         return {
-            content,
-            title,
-            date
+            metadata,
+            content
         };
     } catch  {
         throw error(404, 'Post not found');
