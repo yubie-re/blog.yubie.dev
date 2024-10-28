@@ -412,4 +412,4 @@ Using all the data we've gathered, we can generate completely new fingerprints, 
 
 ## Conclusion
 
-Castle.io’s ``X-Castle-Request-Token`` is a sophisticated mechanism for gathering and analyzing browser fingerprint data. By decoding its components, we can gain insights into its operations and even replicate its behavior. The code to generate and decode tokens is all available on my [repository](https://github.com/yubie-re/castleio).
+Castle.io’s ``X-Castle-Request-Token`` is a sophisticated mechanism for gathering and analyzing browser fingerprint data. By decoding its components, we can gain insights into its operations and even replicate its behavior. The code to generate and decode tokens, along with further specifics, is all available on my [repository](https://github.com/yubie-re/castleio-gen).
