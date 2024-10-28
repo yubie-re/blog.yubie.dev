@@ -1,6 +1,7 @@
 <script>
 	import '../app.css';
 	import GithubIcon from '~icons/mdi/github';
+	import InternetIcon from '~icons/mdi/internet';
 	import Typewriter from 'svelte-typewriter';
 </script>
 
@@ -12,9 +13,14 @@
 			</a>
 			<h2 class="italic">A blog of interesting things I've encountered</h2>
 		</Typewriter>
-		<a href="https://github.com/yubie-re" class="text-2xl">
-			<GithubIcon/>
-		</a>
+		<div class = "flex space-x-2">
+			<a href="https://github.com/yubie-re" class="text-2xl">
+				<GithubIcon/>
+			</a>
+			<a href="https://yubie.dev" class="text-2xl">
+				<InternetIcon/>
+			</a>
+		</div>
 	</div>
 </div>
 
