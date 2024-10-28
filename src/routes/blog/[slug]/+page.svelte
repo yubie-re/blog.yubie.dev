@@ -6,15 +6,25 @@
 </script>
 
 <svelte:head>
-<meta name="title" content={data.metadata.title}>
-<meta name="description" content={data.metadata.description}>
+<title>{data.metadata.title}</title>
+<meta name="title" content={data.metadata.title} />
+<meta name="description" content={data.metadata.description} />
 <meta name="keywords" content={data.metadata.tags}>
-<meta name="robots" content="index, follow">
-<meta name="language" content="English">
+
+
+<!-- Open Graph / Facebook -->
+<meta property="og:type" content="article" />
+<meta property="og:url" content={"http://blog.yubie.dev/blog/" + data.slug} />
 <meta property="og:title" content={data.metadata.title} />
 <meta property="og:description" content={data.metadata.description} />
 <meta property="og:image" content="https://blog.yubie.dev/meta/og.png" />
-<meta property="og:type" content="article" />
+
+<!-- Twitter -->
+<meta property="twitter:card" content="summary_large_image" />
+<meta property="twitter:url" content={"http://blog.yubie.dev/blog/" + data.slug} />
+<meta property="twitter:title" content={data.metadata.title} />
+<meta property="twitter:description" content={data.metadata.description} />
+<meta property="twitter:image" content="https://blog.yubie.dev/meta/og.png" />
 </svelte:head>
 
 <div class="flex justify-center items-start p-5 md:p-0 md:pb-10 w-full" in:blur>

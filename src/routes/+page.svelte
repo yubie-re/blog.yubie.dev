@@ -7,14 +7,23 @@
 </script>
 
 <svelte:head>
-<meta name="title" content="Yubie-re's blog">
-<meta name="description" content="A blog of interesting things I've encountered">
-<meta name="robots" content="index, follow">
-<meta name="language" content="English">
+<title>Yubie-re's blog</title>
+<meta name="title" content="Yubie-re's blog" />
+<meta name="description" content="A blog of interesting things I've encountered" />
+
+<!-- Open Graph / Facebook -->
+<meta property="og:type" content="website" />
+<meta property="og:url" content="http://blog.yubie.dev/" />
 <meta property="og:title" content="Yubie-re's blog" />
 <meta property="og:description" content="A blog of interesting things I've encountered" />
 <meta property="og:image" content="https://blog.yubie.dev/meta/og.png" />
-<meta property="og:type" content="article" />
+
+<!-- Twitter -->
+<meta property="twitter:card" content="summary_large_image" />
+<meta property="twitter:url" content="http://blog.yubie.dev/" />
+<meta property="twitter:title" content="Yubie-re's blog" />
+<meta property="twitter:description" content="A blog of interesting things I've encountered" />
+<meta property="twitter:image" content="https://blog.yubie.dev/meta/og.png" />
 </svelte:head>
 
 
