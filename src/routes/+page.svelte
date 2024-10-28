@@ -6,6 +6,16 @@
     } from 'svelte/transition';
 </script>
 
+<svelte:head>
+<meta name="title" content="Yubie-re's blog">
+<meta name="description" content="A blog of interesting things I've encountered">
+<meta name="robots" content="index, follow">
+<meta name="language" content="English">
+<meta property="og:title" content="Yubie-re's blog" />
+<meta property="og:description" content="A blog of interesting things I've encountered" />
+<meta property="og:image" content="https://yubie.dev/meta/og.png" />
+<meta property="og:type" content="article" />
+</svelte:head>
 
 
 <div class="space-y-3" in:blur>
