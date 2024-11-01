@@ -5,7 +5,6 @@ author: 'yubie-re'
 description: "This blog post explores the inner workings of castle.io's, and how I managed to emulate their behavior to generate and decode a X-Castle-Request-Token"
 tags: "castle,castle.io,yubie,yubie.dev,blog.yubie.dev,castle.js,npm,selenium,sequentum,x-castle-request-token"
 ---
-
 **Castle.io** is a Software-as-a-Service (SaaS) platform designed to help businesses combat spam, fraud, and malicious behavior online. By leveraging browser fingerprinting, Castle.io monitors, tracks, and analyzes user interactions, making it easier to distinguish between real users and automated bots. Websites using Castle.io append a `X-Castle-Request-Token` header, a Base64-encoded string containing fingerprint data about the user's device and browser. This blog post explores the inner workings of this token: what data is being transmitted, the obfuscation techniques used, and how I managed to emulate their behavior to generate and decode any `X-Castle-Request-Token` header.
 
 ## String deobfuscation
